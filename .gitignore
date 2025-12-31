@@ -1,0 +1,90 @@
+# Xcode
+*.xcuserstate
+*.xcworkspace
+xcuserdata/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+Packages/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# SECURITY - Sensitive Configuration Files
+# These files contain AWS credentials and should NEVER be committed
+tag2/Config/Debug.xcconfig
+tag2/Config/Release.xcconfig
+*.xcconfig
+
+# Info.plist with hardcoded credentials (use a template instead)
+# Uncomment if you want to exclude Info.plist with credentials
+# tag2/Info.plist
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Secrets
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+
+# Log files
+*.log
+logs/
+
+# Test artifacts
+*.xcresult
+coverage/
+
+# Memory bank (development notes)
+memory-bank/
