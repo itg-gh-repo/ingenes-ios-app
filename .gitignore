@@ -1,6 +1,5 @@
 # Xcode
 *.xcuserstate
-*.xcworkspace
 xcuserdata/
 DerivedData/
 *.moved-aside
@@ -18,11 +17,21 @@ build/
 *.perspectivev3
 !default.perspectivev3
 
+# Xcode Workspace
+*.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/IDEWorkspaceChecks.plist
+
+# Xcode Project
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/
+
 # Swift Package Manager
 .build/
 .swiftpm/
 Package.resolved
 Packages/
+SourcePackages/
 
 # CocoaPods
 Pods/
@@ -46,22 +55,21 @@ fastlane/test_output
 .Spotlight-V100
 .Trashes
 Thumbs.db
+*~.nib
 
 # IDE
 .idea/
 *.swp
 *.swo
 *~
+.vscode/
 
 # SECURITY - Sensitive Configuration Files
 # These files contain AWS credentials and should NEVER be committed
 tag2/Config/Debug.xcconfig
 tag2/Config/Release.xcconfig
 *.xcconfig
-
-# Info.plist with hardcoded credentials (use a template instead)
-# Uncomment if you want to exclude Info.plist with credentials
-# tag2/Info.plist
+!*.xcconfig.template
 
 # Environment files
 .env
@@ -77,6 +85,7 @@ credentials/
 *.p8
 *.cer
 *.mobileprovision
+*.provisionprofile
 
 # Log files
 *.log
@@ -85,6 +94,26 @@ logs/
 # Test artifacts
 *.xcresult
 coverage/
+TestResults/
+
+# Archives
+*.xcarchive
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# App packaging
+*.app
+*.app.dSYM
+
+# Crashlytics
+crashlytics-build.properties
+crashlytics.properties
+fabric.properties
 
 # Memory bank (development notes)
 memory-bank/
+
+# Claude Code
+.claude/settings.local.json
