@@ -117,3 +117,6 @@ memory-bank/
 
 # Claude Code
 .claude/settings.local.json
+
+# Local scripts
+run-simulator.sh
