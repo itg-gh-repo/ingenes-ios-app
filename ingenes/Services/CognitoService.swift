@@ -480,7 +480,7 @@ actor CognitoService {
         let lastName = json["custom:lastName"] as? String ?? json["family_name"] as? String ?? ""
         let storeName = json["custom:storeName"] as? String ?? ""
         let customerId = json["custom:customerId"] as? String ?? ""
-        let locationStatus = json["custom:locationStatus"] as? String ?? "Active"
+        let locationStatus = json["custom:locStatus"] as? String ?? "Active"
         let recordId = json["custom:recordId"] as? String ?? json["sub"] as? String ?? ""
 
         return CognitoUserAttributes(

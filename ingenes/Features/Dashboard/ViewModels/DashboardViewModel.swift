@@ -1,7 +1,7 @@
 // DashboardViewModel.swift
 // Ingenes
 //
-// Dashboard business logic
+// Dashboard business logic for fertility clinic
 
 import Foundation
 import Combine
@@ -18,39 +18,31 @@ struct DashboardNotification: Identifiable {
     let timeAgo: String
 }
 
-struct ProjectData: Identifiable {
+struct PacientesAtendidosData: Identifiable {
     let id = UUID()
     let month: String
     let count: Int
 }
 
-struct BudgetData: Identifiable {
+struct TratamientoTipoData: Identifiable {
     let id = UUID()
-    let month: String
-    let amount: Double
-
-    var formattedAmount: String {
-        if amount >= 1_000_000 {
-            return String(format: "%.1fM", amount / 1_000_000)
-        } else if amount >= 1_000 {
-            return String(format: "%.0fK", amount / 1_000)
-        }
-        return String(format: "%.0f", amount)
-    }
+    let tipo: String
+    let count: Int
+    let color: Color
 }
 
-enum ProjectPeriod: String, CaseIterable {
+enum ClinicPeriod: String, CaseIterable {
     case threeMonths = "3 meses"
     case sixMonths = "6 meses"
     case oneYear = "1 año"
     case allTime = "Todo"
 
-    var monthCount: Int? {
+    var monthCount: Int {
         switch self {
         case .threeMonths: return 3
         case .sixMonths: return 6
         case .oneYear: return 12
-        case .allTime: return nil
+        case .allTime: return 12
         }
     }
 }
@@ -59,163 +51,70 @@ enum ProjectPeriod: String, CaseIterable {
 class DashboardViewModel: ObservableObject {
     // MARK: - Published State
 
-    @Published var recentWinners: [Winner] = []
-    @Published var proyectos: [Proyecto] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var showSideMenu = false
-    @Published var selectedPeriod: ProjectPeriod = .sixMonths
+    @Published var selectedPeriod: ClinicPeriod = .sixMonths
+
+    // MARK: - Dummy Data
+
+    @Published var pacientesData: [PacientesAtendidosData] = []
+    @Published var tratamientosTipoData: [TratamientoTipoData] = []
 
     // MARK: - Dependencies
 
     private let user: User
-    private let fileMakerService = FileMakerService.shared
 
-    // MARK: - Dummy Data for Notifications
+    // MARK: - Clinic Stats
+
+    var totalPacientesMes: Int { 48 }
+    var citasHoy: Int { 12 }
+    var tasaExito: Double { 62.5 }
+
+    var tratamientosEnCurso: Int {
+        Tratamiento.mockList.filter { $0.resultado == .enCurso }.count
+    }
+
+    var tratamientosPositivos: Int {
+        Tratamiento.mockList.filter { $0.resultado == .positivo }.count
+    }
+
+    var notasPendientes: Int {
+        NotaMedica.mockList.filter { $0.estatus == .pendiente }.count
+    }
+
+    // MARK: - Notifications
 
     var notifications: [DashboardNotification] {
         [
             DashboardNotification(
-                title: "Nuevo pedido recibido",
-                message: "Pedido #1234 de Juan García",
-                icon: "shippingbox.fill",
-                iconColor: .orange,
-                timeAgo: "Hace 5 min"
+                title: "3 notas médicas pendientes",
+                message: "Tienes notas por completar del día de hoy",
+                icon: "stethoscope",
+                iconColor: Color(hex: "4A90D9"),
+                timeAgo: "Hace 10 min"
             ),
             DashboardNotification(
-                title: "Proyecto actualizado",
-                message: "El proyecto 'Renovación Oficina' fue modificado",
-                icon: "folder.fill",
-                iconColor: .blue,
+                title: "Ciclo de estimulación iniciado",
+                message: "Paciente Ana Martínez - Día 1 de estimulación",
+                icon: "heart.text.clipboard",
+                iconColor: .pink,
                 timeAgo: "Hace 1 hora"
             ),
             DashboardNotification(
-                title: "Pago confirmado",
-                message: "Se recibió el pago del pedido #1230",
-                icon: "creditcard.fill",
-                iconColor: .green,
+                title: "Resultados de laboratorio disponibles",
+                message: "Beta-HCG de María García López lista",
+                icon: "flask.fill",
+                iconColor: Color(hex: "388E3C"),
                 timeAgo: "Hace 2 horas"
             ),
             DashboardNotification(
-                title: "Recordatorio",
-                message: "Tienes 3 pedidos pendientes de revisión",
-                icon: "bell.fill",
-                iconColor: .purple,
+                title: "Cita reprogramada",
+                message: "Valentina Díaz - nueva fecha: mañana 10:00 AM",
+                icon: "calendar.badge.clock",
+                iconColor: .orange,
                 timeAgo: "Hace 3 horas"
             )
         ]
-    }
-
-    // MARK: - Projects Data (from FileMaker)
-
-    /// Generates project counts based on selected period
-    var projectsData: [ProjectData] {
-        let calendar = Calendar.current
-        let today = Date()
-
-        // Get short month names in Spanish
-        let monthFormatter = DateFormatter()
-        monthFormatter.locale = Locale(identifier: "es_MX")
-        monthFormatter.dateFormat = "MMM"
-
-        // Date formatter for parsing fechaRegistro (MM/dd/yyyy)
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "MM/dd/yyyy"
-
-        // Determine number of months to show
-        let monthCount = selectedPeriod.monthCount ?? 12 // Default to 12 for "All Time"
-
-        // Generate months for selected period
-        var monthsData: [ProjectData] = []
-        for i in (0..<monthCount).reversed() {
-            guard let monthDate = calendar.date(byAdding: .month, value: -i, to: today) else { continue }
-            let monthName = monthFormatter.string(from: monthDate).capitalized
-            let monthComponents = calendar.dateComponents([.year, .month], from: monthDate)
-
-            // Count projects registered in this month
-            let count = proyectos.filter { proyecto in
-                guard let registroDate = inputFormatter.date(from: proyecto.fechaRegistro) else { return false }
-                let registroComponents = calendar.dateComponents([.year, .month], from: registroDate)
-                return registroComponents.year == monthComponents.year && registroComponents.month == monthComponents.month
-            }.count
-
-            monthsData.append(ProjectData(month: monthName, count: count))
-        }
-
-        return monthsData
-    }
-
-    /// Period label for display
-    var periodLabel: String {
-        switch selectedPeriod {
-        case .threeMonths: return "Últimos 3 meses"
-        case .sixMonths: return "Últimos 6 meses"
-        case .oneYear: return "Último año"
-        case .allTime: return "Últimos 12 meses"
-        }
-    }
-
-    /// Generates budget totals based on selected period
-    var budgetData: [BudgetData] {
-        let calendar = Calendar.current
-        let today = Date()
-
-        // Get short month names in Spanish
-        let monthFormatter = DateFormatter()
-        monthFormatter.locale = Locale(identifier: "es_MX")
-        monthFormatter.dateFormat = "MMM"
-
-        // Date formatter for parsing fechaRegistro (MM/dd/yyyy)
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "MM/dd/yyyy"
-
-        // Determine number of months to show
-        let monthCount = selectedPeriod.monthCount ?? 12
-
-        // Generate months for selected period
-        var monthsData: [BudgetData] = []
-        for i in (0..<monthCount).reversed() {
-            guard let monthDate = calendar.date(byAdding: .month, value: -i, to: today) else { continue }
-            let monthName = monthFormatter.string(from: monthDate).capitalized
-            let monthComponents = calendar.dateComponents([.year, .month], from: monthDate)
-
-            // Sum presupuesto for projects registered in this month
-            let total = proyectos.filter { proyecto in
-                guard let registroDate = inputFormatter.date(from: proyecto.fechaRegistro) else { return false }
-                let registroComponents = calendar.dateComponents([.year, .month], from: registroDate)
-                return registroComponents.year == monthComponents.year && registroComponents.month == monthComponents.month
-            }.reduce(0) { $0 + $1.presupuesto }
-
-            monthsData.append(BudgetData(month: monthName, amount: total))
-        }
-
-        return monthsData
-    }
-
-    /// Total budget across all projects
-    var totalBudget: Double {
-        proyectos.reduce(0) { $0 + $1.presupuesto }
-    }
-
-    /// Formatted total budget string
-    var totalBudgetFormatted: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = Locale(identifier: "es_MX")
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: totalBudget)) ?? "$0"
-    }
-
-    var totalProjects: Int {
-        proyectos.count
-    }
-
-    var activeProjects: Int {
-        proyectos.filter { $0.estatus == .activo }.count
-    }
-
-    var completedProjects: Int {
-        proyectos.filter { $0.estatus == .completado || $0.estatus == .inactivo }.count
     }
 
     // MARK: - Computed Properties
@@ -232,15 +131,6 @@ class DashboardViewModel: ObservableObject {
         }
     }
 
-    var currentMonth: String {
-        Date().monthYearString
-    }
-
-    /// User's company ID for FileMaker queries
-    var companyId: String {
-        user.companyId
-    }
-
     // MARK: - Initialization
 
     init(user: User) {
@@ -251,42 +141,44 @@ class DashboardViewModel: ObservableObject {
 
     func loadDashboardData() async {
         isLoading = true
-        errorMessage = nil
-
         defer { isLoading = false }
 
-        // Load projects and winners in parallel
-        async let projectsTask = loadProjects()
-        async let winnersTask = loadWinners()
+        // Simulate network delay
+        try? await Task.sleep(nanoseconds: 500_000_000)
 
-        await projectsTask
-        await winnersTask
+        loadPacientesData()
+        loadTratamientosTipoData()
     }
 
-    private func loadProjects() async {
-        do {
-            let fetchedProyectos = try await fileMakerService.fetchProyectos(companyId: user.companyId)
-            self.proyectos = fetchedProyectos
-            logInfo("DashboardViewModel: Loaded \(fetchedProyectos.count) projects")
-        } catch {
-            logError("DashboardViewModel: Failed to load projects - \(error.localizedDescription)")
-            // Don't clear existing data on error
+    private func loadPacientesData() {
+        let calendar = Calendar.current
+        let today = Date()
+        let monthFormatter = DateFormatter()
+        monthFormatter.locale = Locale(identifier: "es_MX")
+        monthFormatter.dateFormat = "MMM"
+
+        // Monthly patient counts (realistic dummy data)
+        let monthlyCounts = [42, 38, 55, 47, 61, 48, 52, 45, 58, 50, 44, 53]
+        let monthCount = selectedPeriod.monthCount
+
+        var data: [PacientesAtendidosData] = []
+        for i in (0..<monthCount).reversed() {
+            guard let monthDate = calendar.date(byAdding: .month, value: -i, to: today) else { continue }
+            let monthName = monthFormatter.string(from: monthDate).capitalized
+            let count = monthlyCounts[i % monthlyCounts.count]
+            data.append(PacientesAtendidosData(month: monthName, count: count))
         }
+        pacientesData = data
     }
 
-    private func loadWinners() async {
-        do {
-            recentWinners = try await fileMakerService.getMonthlyWinners(
-                customerId: user.companyId
-            )
-            // Sort by most recent first and limit to 5
-            recentWinners = Array(recentWinners.sorted {
-                $0.submittedDate > $1.submittedDate
-            }.prefix(5))
-        } catch {
-            logError("DashboardViewModel: Failed to load winners - \(error.localizedDescription)")
-            // Don't clear existing data on error
-        }
+    private func loadTratamientosTipoData() {
+        tratamientosTipoData = [
+            TratamientoTipoData(tipo: "FIV Propios", count: 35, color: Color(hex: "4A90D9")),
+            TratamientoTipoData(tipo: "Ovodonación", count: 25, color: Color(hex: "E91E63")),
+            TratamientoTipoData(tipo: "IAD", count: 15, color: Color(hex: "9C27B0")),
+            TratamientoTipoData(tipo: "Descongelación", count: 12, color: Color(hex: "00BCD4")),
+            TratamientoTipoData(tipo: "Otros", count: 13, color: Color(hex: "FF9800")),
+        ]
     }
 
     func refresh() async {

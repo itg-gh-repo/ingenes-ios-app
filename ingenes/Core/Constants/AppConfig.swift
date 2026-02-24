@@ -31,7 +31,7 @@ enum AppConfig {
 
     // MARK: - AWS Cognito Identity Pool
     // Used for obtaining AWS credentials to access Secrets Manager
-    static let cognitoIdentityPoolId = "us-east-1:c9967d40-795e-4682-a4f4-67ab4286c7dd"
+    static let cognitoIdentityPoolId = "us-east-1:e8d35fb6-3833-4dba-b2de-d76aaae2e4d0"
 
     // MARK: - AWS Secrets Manager
     // Secret name for FileMaker credentials

@@ -110,17 +110,10 @@ struct SignInView: View {
     // MARK: - Logo Section
 
     private var logoSection: some View {
-        VStack(spacing: AppTheme.spacingSM) {
-            Image("logo")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 80)
-
-            Text("INSTITUTO INGENES")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(AppTheme.accentColor)
-                .tracking(2)
-        }
+        Image("logo-full")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 120)
     }
 
     // MARK: - Welcome Section

@@ -1,7 +1,7 @@
 // DashboardView.swift
 // Ingenes
 //
-// Main dashboard screen
+// Main dashboard screen for fertility clinic
 
 import SwiftUI
 import Combine
@@ -10,45 +10,27 @@ struct DashboardView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var viewModel: DashboardViewModel
 
-    @State private var showPedidos = false
-    @State private var showProyectos = false
+    @State private var showNotasMedicas = false
+    @State private var showTratamientos = false
     @State private var showSideMenu = false
-    @State private var selectedChartTab: ChartTab = .proyectos
+    @State private var selectedChartTab: ChartTab = .pacientes
 
     // MARK: - Chart Tab
 
     enum ChartTab: String, CaseIterable {
-        case proyectos = "Proyectos"
-        case presupuesto = "Presupuesto"
+        case pacientes = "Pacientes"
+        case tratamientos = "Tratamientos"
     }
 
     // MARK: - Bar Chart Sizing
 
-    /// Dynamic bar width based on period
-    private var barWidth: CGFloat {
-        switch viewModel.selectedPeriod {
-        case .threeMonths: return 80
-        case .sixMonths: return 45
-        case .oneYear, .allTime: return 30
-        }
-    }
-
-    /// Dynamic bar height multiplier based on max value
     private var barHeightMultiplier: CGFloat {
-        let maxCount = viewModel.projectsData.map { $0.count }.max() ?? 1
+        let maxCount = viewModel.pacientesData.map { $0.count }.max() ?? 1
         if maxCount == 0 { return 1 }
         return 80 / CGFloat(maxCount)
     }
 
-    /// Dynamic bar height multiplier for budget chart
-    private var budgetBarHeightMultiplier: CGFloat {
-        let maxAmount = viewModel.budgetData.map { $0.amount }.max() ?? 1
-        if maxAmount == 0 { return 1 }
-        return 80 / maxAmount
-    }
-
     init() {
-        // Initialize with a placeholder - will be updated on appear
         _viewModel = StateObject(wrappedValue: DashboardViewModel(user: User.mock))
     }
 
@@ -56,16 +38,9 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: AppTheme.spacingLG) {
-                    // Welcome Header
                     welcomeHeader
-
-                    // Tabbed Charts Card (Proyectos / Presupuesto)
                     tabbedChartsCard
-
-                    // Quick Actions
                     quickActionsSection
-
-                    // Notifications Card (compact)
                     notificationsCard
                 }
                 .padding(.horizontal, AppTheme.spacingMD)
@@ -90,24 +65,17 @@ struct DashboardView: View {
                     handleMenuNavigation(destination)
                 }
             }
-            .fullScreenCover(isPresented: $showPedidos) {
+            .fullScreenCover(isPresented: $showNotasMedicas) {
                 NavigationStack {
-                    PedidosView()
+                    NotasMedicasView()
                 }
             }
-            .fullScreenCover(isPresented: $showProyectos) {
+            .fullScreenCover(isPresented: $showTratamientos) {
                 NavigationStack {
-                    ProyectosView()
-                        .environmentObject(appState)
+                    TratamientosView()
                 }
             }
             .task {
-                if let user = appState.currentUser {
-                    // Re-initialize viewModel with actual user
-                    await MainActor.run {
-                        // This is a workaround since we can't reinitialize StateObject
-                    }
-                }
                 await viewModel.loadDashboardData()
             }
         }
@@ -118,12 +86,11 @@ struct DashboardView: View {
     private func handleMenuNavigation(_ destination: MenuDestination) {
         switch destination {
         case .dashboard:
-            // Already on dashboard, do nothing
             break
-        case .proyectos:
-            showProyectos = true
-        case .pedidos:
-            showPedidos = true
+        case .notasMedicas:
+            showNotasMedicas = true
+        case .tratamientos:
+            showTratamientos = true
         }
     }
 
@@ -145,11 +112,10 @@ struct DashboardView: View {
         .padding(.top, AppTheme.spacingSM)
     }
 
-    // MARK: - Notifications Card (Compact)
+    // MARK: - Notifications Card
 
     private var notificationsCard: some View {
         VStack(spacing: AppTheme.spacingSM) {
-            // Header with badge
             HStack {
                 Image(systemName: "bell.fill")
                     .foregroundColor(AppTheme.primaryGreen)
@@ -158,7 +124,6 @@ struct DashboardView: View {
                     .font(AppTheme.headline)
                     .foregroundColor(AppTheme.textPrimary)
 
-                // Badge
                 Text("\(viewModel.notifications.count)")
                     .font(AppTheme.caption2)
                     .foregroundColor(.white)
@@ -176,7 +141,6 @@ struct DashboardView: View {
                 .foregroundColor(AppTheme.primaryGreen)
             }
 
-            // Compact notification list (just titles)
             VStack(spacing: AppTheme.spacingXS) {
                 ForEach(viewModel.notifications.prefix(3)) { notification in
                     CompactNotificationRow(notification: notification)
@@ -190,62 +154,63 @@ struct DashboardView: View {
     // MARK: - Tabbed Charts Card
 
     private var currentTabColor: Color {
-        selectedChartTab == .proyectos ? AppTheme.primaryGreen : Color.orange
+        selectedChartTab == .pacientes ? AppTheme.primaryGreen : Color.pink
     }
 
     private var tabbedChartsCard: some View {
         VStack(spacing: 0) {
-            // Header with icon and period picker
+            // Header
             HStack(alignment: .center) {
-                // Chart icon with color indicator
-                Image(systemName: selectedChartTab == .proyectos ? "chart.bar.fill" : "dollarsign.circle.fill")
+                Image(systemName: selectedChartTab == .pacientes ? "chart.bar.fill" : "chart.pie.fill")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(currentTabColor)
                     .animation(.easeInOut(duration: 0.2), value: selectedChartTab)
 
-                Text(selectedChartTab == .proyectos ? "Proyectos" : "Presupuesto")
+                Text(selectedChartTab == .pacientes ? "Pacientes Atendidos" : "Tipos de Tratamiento")
                     .font(AppTheme.headline)
                     .foregroundColor(AppTheme.textPrimary)
 
                 Spacer()
 
-                // Period Picker - pill style
-                Menu {
-                    ForEach(ProjectPeriod.allCases, id: \.self) { period in
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.selectedPeriod = period
-                            }
-                        } label: {
-                            HStack {
-                                Text(period.rawValue)
-                                if viewModel.selectedPeriod == period {
-                                    Image(systemName: "checkmark")
+                if selectedChartTab == .pacientes {
+                    Menu {
+                        ForEach(ClinicPeriod.allCases, id: \.self) { period in
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.selectedPeriod = period
+                                }
+                                Task { await viewModel.refresh() }
+                            } label: {
+                                HStack {
+                                    Text(period.rawValue)
+                                    if viewModel.selectedPeriod == period {
+                                        Image(systemName: "checkmark")
+                                    }
                                 }
                             }
                         }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "calendar")
+                                .font(.system(size: 11, weight: .medium))
+                            Text(viewModel.selectedPeriod.rawValue)
+                                .font(.system(size: 12, weight: .medium))
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 9, weight: .bold))
+                        }
+                        .foregroundColor(currentTabColor)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(currentTabColor.opacity(0.12))
+                        .cornerRadius(20)
                     }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "calendar")
-                            .font(.system(size: 11, weight: .medium))
-                        Text(viewModel.selectedPeriod.rawValue)
-                            .font(.system(size: 12, weight: .medium))
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 9, weight: .bold))
-                    }
-                    .foregroundColor(currentTabColor)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(currentTabColor.opacity(0.12))
-                    .cornerRadius(20)
                 }
             }
             .padding(.horizontal, AppTheme.spacingMD)
             .padding(.top, AppTheme.spacingMD)
             .padding(.bottom, AppTheme.spacingSM)
 
-            // Segmented Tab Control
+            // Tab Control
             HStack(spacing: 0) {
                 ForEach(ChartTab.allCases, id: \.self) { tab in
                     Button {
@@ -255,17 +220,16 @@ struct DashboardView: View {
                     } label: {
                         VStack(spacing: 8) {
                             HStack(spacing: 6) {
-                                Image(systemName: tab == .proyectos ? "folder.fill" : "banknote.fill")
+                                Image(systemName: tab == .pacientes ? "person.3.fill" : "heart.text.clipboard")
                                     .font(.system(size: 13))
                                 Text(tab.rawValue)
                                     .font(.system(size: 14, weight: .medium))
                             }
-                            .foregroundColor(selectedChartTab == tab ? (tab == .proyectos ? AppTheme.primaryGreen : .orange) : AppTheme.textMuted)
+                            .foregroundColor(selectedChartTab == tab ? (tab == .pacientes ? AppTheme.primaryGreen : .pink) : AppTheme.textMuted)
                             .frame(maxWidth: .infinity)
 
-                            // Active indicator bar
                             Rectangle()
-                                .fill(selectedChartTab == tab ? (tab == .proyectos ? AppTheme.primaryGreen : .orange) : Color.clear)
+                                .fill(selectedChartTab == tab ? (tab == .pacientes ? AppTheme.primaryGreen : .pink) : Color.clear)
                                 .frame(height: 3)
                                 .cornerRadius(1.5)
                         }
@@ -278,16 +242,16 @@ struct DashboardView: View {
             Divider()
                 .padding(.horizontal, AppTheme.spacingMD)
 
-            // Chart content with transition
+            // Chart content
             Group {
-                if selectedChartTab == .proyectos {
-                    projectsChartContent
+                if selectedChartTab == .pacientes {
+                    pacientesChartContent
                         .transition(.asymmetric(
                             insertion: .move(edge: .leading).combined(with: .opacity),
                             removal: .move(edge: .trailing).combined(with: .opacity)
                         ))
                 } else {
-                    budgetChartContent
+                    tratamientosChartContent
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),
                             removal: .move(edge: .leading).combined(with: .opacity)
@@ -300,26 +264,23 @@ struct DashboardView: View {
         .cardStyle()
     }
 
-    // MARK: - Projects Chart Content
+    // MARK: - Pacientes Chart Content
 
-    private var projectsChartContent: some View {
+    private var pacientesChartContent: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacingMD) {
-            // Bar chart with gradient bars
             GeometryReader { geometry in
                 let availableWidth = geometry.size.width
-                let dataCount = CGFloat(viewModel.projectsData.count)
+                let dataCount = CGFloat(viewModel.pacientesData.count)
                 let dynamicBarWidth = max(20, min(50, (availableWidth - (dataCount - 1) * 8) / dataCount))
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .bottom, spacing: 8) {
-                        ForEach(Array(viewModel.projectsData.enumerated()), id: \.element.id) { index, data in
+                        ForEach(viewModel.pacientesData) { data in
                             VStack(spacing: 6) {
-                                // Value label
                                 Text("\(data.count)")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(data.count > 0 ? AppTheme.primaryGreen : AppTheme.textMuted)
 
-                                // Animated bar with gradient
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(
                                         LinearGradient(
@@ -334,7 +295,6 @@ struct DashboardView: View {
                                     )
                                     .shadow(color: AppTheme.primaryGreen.opacity(0.3), radius: 4, x: 0, y: 2)
 
-                                // Month label
                                 Text(data.month)
                                     .font(.system(size: 10, weight: .medium))
                                     .foregroundColor(AppTheme.textMuted)
@@ -348,122 +308,141 @@ struct DashboardView: View {
             }
             .frame(height: 130)
 
-            // Stats cards row
+            // Stats row
             HStack(spacing: 12) {
                 ChartStatCard(
-                    title: "Total",
-                    value: "\(viewModel.totalProjects)",
-                    icon: "square.stack.3d.up.fill",
+                    title: "Total Mes",
+                    value: "\(viewModel.totalPacientesMes)",
+                    icon: "person.fill",
                     color: AppTheme.textPrimary,
                     backgroundColor: AppTheme.backgroundSecondary
                 )
 
                 ChartStatCard(
-                    title: "Activos",
-                    value: "\(viewModel.activeProjects)",
-                    icon: "bolt.fill",
+                    title: "Citas Hoy",
+                    value: "\(viewModel.citasHoy)",
+                    icon: "calendar",
                     color: AppTheme.primaryGreen,
                     backgroundColor: AppTheme.primaryGreen.opacity(0.1)
                 )
 
                 ChartStatCard(
-                    title: "Cerrados",
-                    value: "\(viewModel.completedProjects)",
-                    icon: "checkmark.circle.fill",
-                    color: .blue,
-                    backgroundColor: Color.blue.opacity(0.1)
+                    title: "Tasa Éxito",
+                    value: String(format: "%.1f%%", viewModel.tasaExito),
+                    icon: "chart.line.uptrend.xyaxis",
+                    color: Color(hex: "388E3C"),
+                    backgroundColor: Color(hex: "388E3C").opacity(0.1)
                 )
             }
         }
     }
 
-    // MARK: - Budget Chart Content
+    // MARK: - Tratamientos Donut Chart Content
 
-    private var budgetChartContent: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacingMD) {
-            // Bar chart with gradient bars
-            GeometryReader { geometry in
-                let availableWidth = geometry.size.width
-                let dataCount = CGFloat(viewModel.budgetData.count)
-                let dynamicBarWidth = max(20, min(50, (availableWidth - (dataCount - 1) * 8) / dataCount))
+    private var tratamientosChartContent: some View {
+        VStack(spacing: AppTheme.spacingMD) {
+            // Donut chart
+            HStack(spacing: AppTheme.spacingMD) {
+                ZStack {
+                    let total = viewModel.tratamientosTipoData.reduce(0) { $0 + $1.count }
+                    let slices = computeSlices()
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .bottom, spacing: 8) {
-                        ForEach(viewModel.budgetData) { data in
-                            VStack(spacing: 6) {
-                                // Value label
-                                Text(data.formattedAmount)
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(data.amount > 0 ? .orange : AppTheme.textMuted)
+                    ForEach(Array(slices.enumerated()), id: \.offset) { index, slice in
+                        Circle()
+                            .trim(from: slice.start, to: slice.end)
+                            .stroke(slice.color, style: StrokeStyle(lineWidth: 24, lineCap: .butt))
+                            .rotationEffect(.degrees(-90))
+                    }
 
-                                // Animated bar with gradient
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color.orange, Color.orange.opacity(0.7)],
-                                            startPoint: .top,
-                                            endPoint: .bottom
-                                        )
-                                    )
-                                    .frame(
-                                        width: dynamicBarWidth,
-                                        height: max(CGFloat(data.amount * budgetBarHeightMultiplier), data.amount > 0 ? 8 : 4)
-                                    )
-                                    .shadow(color: Color.orange.opacity(0.3), radius: 4, x: 0, y: 2)
+                    // Center label
+                    VStack(spacing: 2) {
+                        Text("\(total)")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(AppTheme.textPrimary)
+                        Text("Total")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(AppTheme.textMuted)
+                    }
+                }
+                .frame(width: 130, height: 130)
 
-                                // Month label
-                                Text(data.month)
-                                    .font(.system(size: 10, weight: .medium))
-                                    .foregroundColor(AppTheme.textMuted)
-                            }
-                            .frame(width: dynamicBarWidth)
+                // Legend
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(viewModel.tratamientosTipoData) { item in
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(item.color)
+                                .frame(width: 10, height: 10)
+
+                            Text(item.tipo)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(AppTheme.textPrimary)
+                                .lineLimit(1)
+
+                            Spacer()
+
+                            Text("\(item.count)")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(AppTheme.textSecondary)
                         }
                     }
-                    .padding(.horizontal, 4)
-                    .padding(.top, 8)
                 }
             }
-            .frame(height: 130)
 
-            // Total Budget card - prominent display
-            HStack(spacing: 16) {
-                // Total budget highlight
-                HStack(spacing: 12) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.orange.opacity(0.15))
-                            .frame(width: 44, height: 44)
-                        Image(systemName: "dollarsign.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(.orange)
-                    }
+            // Stats row
+            HStack(spacing: 12) {
+                ChartStatCard(
+                    title: "En Curso",
+                    value: "\(viewModel.tratamientosEnCurso)",
+                    icon: "arrow.triangle.2.circlepath",
+                    color: Color(hex: "4A90D9"),
+                    backgroundColor: Color(hex: "4A90D9").opacity(0.1)
+                )
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Total Presupuesto")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(AppTheme.textSecondary)
-                        Text(viewModel.totalBudgetFormatted)
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.orange)
-                    }
-                }
+                ChartStatCard(
+                    title: "Positivos",
+                    value: "\(viewModel.tratamientosPositivos)",
+                    icon: "checkmark.circle.fill",
+                    color: Color(hex: "388E3C"),
+                    backgroundColor: Color(hex: "388E3C").opacity(0.1)
+                )
 
-                Spacer()
-
-                // Project count indicator
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("\(viewModel.totalProjects)")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(AppTheme.textPrimary)
-                    Text("proyectos")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(AppTheme.textMuted)
-                }
+                ChartStatCard(
+                    title: "Pendientes",
+                    value: "\(viewModel.notasPendientes)",
+                    icon: "clock.fill",
+                    color: .orange,
+                    backgroundColor: Color.orange.opacity(0.1)
+                )
             }
-            .padding(12)
-            .background(Color.orange.opacity(0.08))
-            .cornerRadius(12)
         }
+    }
+
+    private struct DonutSlice {
+        let start: CGFloat
+        let end: CGFloat
+        let color: Color
+    }
+
+    private func computeSlices() -> [DonutSlice] {
+        let total = CGFloat(viewModel.tratamientosTipoData.reduce(0) { $0 + $1.count })
+        guard total > 0 else { return [] }
+
+        var slices: [DonutSlice] = []
+        var currentAngle: CGFloat = 0
+
+        for item in viewModel.tratamientosTipoData {
+            let fraction = CGFloat(item.count) / total
+            let slice = DonutSlice(
+                start: currentAngle,
+                end: currentAngle + fraction,
+                color: item.color
+            )
+            slices.append(slice)
+            currentAngle += fraction
+        }
+
+        return slices
     }
 
     // MARK: - Quick Actions
@@ -479,145 +458,21 @@ struct DashboardView: View {
                 GridItem(.flexible())
             ], spacing: AppTheme.spacingMD) {
                 DashboardCard(
-                    title: "Proyectos",
-                    icon: "folder.fill",
-                    color: .blue
+                    title: "Notas Médicas",
+                    icon: "stethoscope",
+                    color: Color(hex: "4A90D9")
                 ) {
-                    showProyectos = true
+                    showNotasMedicas = true
                 }
 
                 DashboardCard(
-                    title: "Pedidos",
-                    icon: "shippingbox.fill",
-                    color: .orange
+                    title: "Tratamientos",
+                    icon: "heart.text.clipboard",
+                    color: .pink
                 ) {
-                    showPedidos = true
+                    showTratamientos = true
                 }
             }
-        }
-    }
-
-    // MARK: - Recent Winners
-
-    private var recentWinnersSection: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacingMD) {
-            HStack {
-                Text("Ganadores Recientes")
-                    .font(AppTheme.headline)
-                    .foregroundColor(AppTheme.textPrimary)
-
-                Spacer()
-
-                Button("Ver Todos") {
-                    // TODO: Navigate to History
-                }
-                .font(AppTheme.callout)
-                .foregroundColor(AppTheme.primaryGreen)
-            }
-
-            if viewModel.isLoading && viewModel.recentWinners.isEmpty {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-                .padding(.vertical, AppTheme.spacingXL)
-            } else if viewModel.recentWinners.isEmpty {
-                emptyWinnersView
-            } else {
-                VStack(spacing: AppTheme.spacingSM) {
-                    ForEach(viewModel.recentWinners) { winner in
-                        WinnerRow(winner: winner)
-                    }
-                }
-            }
-        }
-    }
-
-    private var emptyWinnersView: some View {
-        VStack(spacing: AppTheme.spacingMD) {
-            Image(systemName: "trophy")
-                .font(.system(size: 40))
-                .foregroundColor(AppTheme.textMuted)
-
-            Text("Aún no hay ganadores enviados")
-                .font(AppTheme.callout)
-                .foregroundColor(AppTheme.textSecondary)
-
-            Text("¡Envía tu primer ganador para comenzar!")
-                .font(AppTheme.caption)
-                .foregroundColor(AppTheme.textMuted)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, AppTheme.spacingXL)
-        .cardStyle()
-    }
-}
-
-// MARK: - Winner Row
-
-struct WinnerRow: View {
-    let winner: Winner
-
-    var body: some View {
-        HStack(spacing: AppTheme.spacingMD) {
-            // Icon
-            Circle()
-                .fill(AppTheme.primaryGreen.opacity(0.2))
-                .frame(width: 44, height: 44)
-                .overlay(
-                    Image(systemName: "person.fill")
-                        .foregroundColor(AppTheme.primaryGreen)
-                )
-
-            // Info
-            VStack(alignment: .leading, spacing: AppTheme.spacingXS) {
-                Text(winner.name)
-                    .font(AppTheme.headline)
-                    .foregroundColor(AppTheme.textPrimary)
-
-                Text(winner.awardName)
-                    .font(AppTheme.caption)
-                    .foregroundColor(AppTheme.textSecondary)
-            }
-
-            Spacer()
-
-            // Status
-            VStack(alignment: .trailing, spacing: AppTheme.spacingXS) {
-                Text(winner.displayDate)
-                    .font(AppTheme.caption)
-                    .foregroundColor(AppTheme.textSecondary)
-
-                StatusBadge(status: winner.workOrderStatus)
-            }
-        }
-        .padding(AppTheme.spacingMD)
-        .cardStyle()
-    }
-}
-
-// MARK: - Status Badge
-
-struct StatusBadge: View {
-    let status: String
-
-    var body: some View {
-        Text(status)
-            .font(AppTheme.caption2)
-            .foregroundColor(statusColor)
-            .padding(.horizontal, AppTheme.spacingSM)
-            .padding(.vertical, AppTheme.spacingXS)
-            .background(statusColor.opacity(0.2))
-            .cornerRadius(AppTheme.radiusSM)
-    }
-
-    private var statusColor: Color {
-        switch status.lowercased() {
-        case "shipped": return AppTheme.successColor
-        case "processing": return AppTheme.warningColor
-        case "pending": return Color.yellow
-        default: return AppTheme.textSecondary
         }
     }
 }
@@ -629,13 +484,11 @@ struct CompactNotificationRow: View {
 
     var body: some View {
         HStack(spacing: AppTheme.spacingSM) {
-            // Small icon
             Image(systemName: notification.icon)
                 .font(.system(size: 12))
                 .foregroundColor(notification.iconColor)
                 .frame(width: 20)
 
-            // Title only
             Text(notification.title)
                 .font(AppTheme.caption)
                 .foregroundColor(AppTheme.textPrimary)
@@ -643,7 +496,6 @@ struct CompactNotificationRow: View {
 
             Spacer()
 
-            // Time
             Text(notification.timeAgo)
                 .font(AppTheme.caption2)
                 .foregroundColor(AppTheme.textMuted)
@@ -663,17 +515,14 @@ struct ChartStatCard: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            // Icon
             Image(systemName: icon)
                 .font(.system(size: 14))
                 .foregroundColor(color)
 
-            // Value
             Text(value)
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(color)
 
-            // Title
             Text(title)
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(AppTheme.textMuted)

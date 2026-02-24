@@ -9,8 +9,8 @@ import SwiftUI
 
 enum MenuDestination {
     case dashboard
-    case proyectos
-    case pedidos
+    case notasMedicas
+    case tratamientos
 }
 
 struct SideMenuView: View {
@@ -102,14 +102,14 @@ struct SideMenuView: View {
                 onNavigate?(.dashboard)
             }
 
-            MenuRow(icon: "folder.fill", title: "Proyectos", color: .blue) {
+            MenuRow(icon: "stethoscope", title: "Notas Médicas", color: Color(hex: "4A90D9")) {
                 dismiss()
-                onNavigate?(.proyectos)
+                onNavigate?(.notasMedicas)
             }
 
-            MenuRow(icon: "shippingbox.fill", title: "Pedidos", color: .orange) {
+            MenuRow(icon: "heart.text.clipboard", title: "Tratamientos", color: .pink) {
                 dismiss()
-                onNavigate?(.pedidos)
+                onNavigate?(.tratamientos)
             }
         }
     }

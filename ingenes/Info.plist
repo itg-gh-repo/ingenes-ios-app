@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>COGNITO_REGION</key>
-	<string>us-east-1</string>
+	<string>$(COGNITO_REGION)</string>
 	<key>COGNITO_USER_POOL_ID</key>
-	<string>us-east-1_93HMCJqvJ</string>
+	<string>$(COGNITO_USER_POOL_ID)</string>
 	<key>COGNITO_CLIENT_ID</key>
-	<string>6s98m6r64ql20ab09phvj2of2n</string>
+	<string>$(COGNITO_CLIENT_ID)</string>
 	<key>COGNITO_CLIENT_SECRET</key>
-	<string></string>
+	<string>$(COGNITO_CLIENT_SECRET)</string>
 </dict>
 </plist>

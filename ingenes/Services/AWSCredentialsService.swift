@@ -53,7 +53,7 @@ actor AWSCredentialsService {
     private var cachedCredentials: AWSCredentials?
     private var cachedIdentityId: String?
 
-    private let identityPoolId = "us-east-1:c9967d40-795e-4682-a4f4-67ab4286c7dd"
+    private let identityPoolId = "us-east-1:e8d35fb6-3833-4dba-b2de-d76aaae2e4d0"
     private let region = "us-east-1"
 
     private init() {}

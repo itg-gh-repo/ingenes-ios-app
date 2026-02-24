@@ -153,3 +153,6 @@ xcodebuild test \
 - App Version: 1.0.0
 - Minimum iOS: 15.0
 - Swift: 5.9+
+
+
+xcrun simctl install "iPad Air 11-inch (M3)" $(xcodebuild -project ingenes.xcodeproj -scheme ingenes -destination 'platform=iOS Simulator,name=iPad Air 11-inch (M3)' -showBuildSettings 2>/dev/null | grep -m1 "BUILT_PRODUCTS_DIR" | awk '{print $3}')/ingenes.app && xcrun simctl launch "iPad Air 11-inch (M3)" mx.itgroup.ingenes

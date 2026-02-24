@@ -92,7 +92,7 @@ struct SplashView: View {
                         // Logo with shimmer effect
                         ZStack {
                             // Main logo
-                            Image("logo")
+                            Image("logo-splash")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 120, height: 120)
@@ -115,7 +115,7 @@ struct SplashView: View {
                                 .frame(width: 50, height: 150)
                                 .offset(x: shimmerOffset)
                                 .mask(
-                                    Image("logo")
+                                    Image("logo-splash")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 120, height: 120)

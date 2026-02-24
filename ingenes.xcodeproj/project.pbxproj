@@ -27,12 +27,16 @@
 		49B5B6832EF90B0200EB7C5A /* ingenes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ingenes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B5B6902EF90B0500EB7C5A /* ingenesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ingenesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B5B69A2EF90B0500EB7C5A /* ingenesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ingenesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000012EF90B0500EB7C5A /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "ingenes/Config/Debug.xcconfig"; sourceTree = SOURCE_ROOT; };
+		AA0000022EF90B0500EB7C5A /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "ingenes/Config/Release.xcconfig"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		499122A92EFF46DF00E3046A /* Exceptions for "ingenes" folder in "ingenes" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Config/Debug.xcconfig,
+				Config/Release.xcconfig,
 				Info.plist,
 			);
 			target = 49B5B6822EF90B0200EB7C5A /* ingenes */;
@@ -405,6 +409,7 @@
 		};
 		49B5B6A52EF90B0500EB7C5A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000012EF90B0500EB7C5A /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -441,6 +446,7 @@
 		};
 		49B5B6A62EF90B0500EB7C5A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AA0000022EF90B0500EB7C5A /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
