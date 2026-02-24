@@ -1,6 +1,6 @@
-Perform a comprehensive security, code quality, and App Store compliance validation for the TAG2 iOS app.
+Perform a comprehensive security, code quality, and App Store compliance validation for the Ingenes iOS app.
 
-Search the tag2 directory for all issues and generate a detailed report.
+Search the ingenes directory for all issues and generate a detailed report.
 
 SECURITY VALIDATION
 
@@ -123,7 +123,7 @@ GENERATE COMPREHENSIVE REPORT
 
 After completing all checks create a detailed report with these sections:
 
-TAG2 App Store Security and Compliance Report
+Ingenes App Store Security and Compliance Report
 
 Executive Summary with:
 - Overall readiness score (percentage)

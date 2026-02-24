@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #===============================================================================
-# TAG2 AWS Resources Deletion Script
+# Ingenes AWS Resources Deletion Script
 #===============================================================================
-# WARNING: This script will PERMANENTLY DELETE all AWS resources used by TAG2.
+# WARNING: This script will PERMANENTLY DELETE all AWS resources used by Ingenes.
 # This action is IRREVERSIBLE. Make sure you have backups before proceeding.
 #
 # AWS Services to be deleted:
@@ -19,11 +19,11 @@
 
 set -e  # Exit on any error
 
-# Configuration - TAG2 AWS Resource Identifiers
+# Configuration - Ingenes AWS Resource Identifiers
 AWS_REGION="us-east-1"
 COGNITO_USER_POOL_ID="us-east-1_93HMCJqvJ"
 COGNITO_IDENTITY_POOL_ID="us-east-1:c9967d40-795e-4682-a4f4-67ab4286c7dd"
-SECRETS_MANAGER_SECRET_NAME="TAG2/FileMaker/Credentials"
+SECRETS_MANAGER_SECRET_NAME="Ingenes/FileMaker/Credentials"
 
 # Colors for output
 RED='\033[0;31m'
@@ -100,9 +100,9 @@ confirm_deletion() {
     echo "=============================================================================="
     echo ""
 
-    read -p "Type 'DELETE-TAG2-AWS' to confirm deletion: " confirmation
+    read -p "Type 'DELETE-Ingenes-AWS' to confirm deletion: " confirmation
 
-    if [ "$confirmation" != "DELETE-TAG2-AWS" ]; then
+    if [ "$confirmation" != "DELETE-Ingenes-AWS" ]; then
         log_warning "Deletion cancelled. No resources were modified."
         exit 0
     fi
@@ -202,29 +202,29 @@ delete_cognito_iam_roles() {
     log_info "Checking for Cognito Identity Pool IAM roles..."
 
     # Common naming pattern for Cognito Identity Pool roles
-    local auth_role="Cognito_TAG2Auth_Role"
-    local unauth_role="Cognito_TAG2Unauth_Role"
+    local auth_role="Cognito_IngenesAuth_Role"
+    local unauth_role="Cognito_IngenesUnauth_Role"
 
     # These are placeholder names - actual role names depend on how they were created
     # You may need to update these based on your actual IAM role names
 
     log_warning "IAM roles may need to be deleted manually."
-    log_info "Check for roles with names containing 'TAG2' or 'Cognito' in IAM console."
+    log_info "Check for roles with names containing 'Ingenes' or 'Cognito' in IAM console."
     echo ""
     echo "  Common role patterns to look for:"
-    echo "    - Cognito_TAG2*"
-    echo "    - TAG2-CognitoAuthorizedRole"
-    echo "    - TAG2-CognitoUnauthorizedRole"
+    echo "    - Cognito_Ingenes*"
+    echo "    - Ingenes-CognitoAuthorizedRole"
+    echo "    - Ingenes-CognitoUnauthorizedRole"
     echo ""
     echo "  To list Cognito-related roles, run:"
-    echo "    aws iam list-roles --query \"Roles[?contains(RoleName, 'Cognito') || contains(RoleName, 'TAG2')].RoleName\""
+    echo "    aws iam list-roles --query \"Roles[?contains(RoleName, 'Cognito') || contains(RoleName, 'Ingenes')].RoleName\""
 }
 
 # Main execution
 main() {
     echo ""
     echo "=============================================================================="
-    echo "           TAG2 AWS Resources Deletion Script"
+    echo "           Ingenes AWS Resources Deletion Script"
     echo "=============================================================================="
     echo ""
 
@@ -262,7 +262,7 @@ main() {
 
     echo ""
     echo "=============================================================================="
-    log_success "TAG2 AWS resource deletion completed!"
+    log_success "Ingenes AWS resource deletion completed!"
     echo "=============================================================================="
     echo ""
     log_warning "Remember to:"

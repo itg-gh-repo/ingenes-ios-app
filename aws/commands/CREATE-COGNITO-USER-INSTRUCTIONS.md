@@ -1,8 +1,8 @@
-# TAG2 Cognito User Creation Guide
+# Ingenes Cognito User Creation Guide
 
 ## Overview
 
-This document provides detailed instructions for creating new users in the TAG2 Cognito User Pool using the provided bash script.
+This document provides detailed instructions for creating new users in the Ingenes Cognito User Pool using the provided bash script.
 
 ---
 
@@ -85,7 +85,7 @@ Or use the AWS managed policy: `AmazonCognitoPowerUser`
 ### Step 1: Navigate to the Script Directory
 
 ```bash
-cd /Users/ozz/Desktop/TAG2/aws/commands
+cd /Users/ozz/Desktop/Ingenes/aws/commands
 ```
 
 ### Step 2: Make the Script Executable
@@ -146,7 +146,7 @@ After successful creation, share with the new user:
 **Output:**
 ```
 ==============================================================================
-           TAG2 Cognito User Creation
+           Ingenes Cognito User Creation
 ==============================================================================
 
 [INFO] Running pre-flight checks...
@@ -365,7 +365,7 @@ This is expected! The user needs to log in to the app and change their temporary
 
 ## Custom Attributes Reference
 
-The TAG2 User Pool supports these custom attributes:
+The Ingenes User Pool supports these custom attributes:
 
 | Attribute | Description | Example |
 |-----------|-------------|---------|

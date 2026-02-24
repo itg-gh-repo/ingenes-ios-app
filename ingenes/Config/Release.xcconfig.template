@@ -1,0 +1,19 @@
+// Release.xcconfig.template
+// Ingenes
+//
+// TEMPLATE for Release build configuration
+// Copy this file to Release.xcconfig and fill in your values
+// NOTE: Release.xcconfig should be added to .gitignore
+
+// MARK: - AWS Cognito Configuration
+// Get these values from AWS Console > Cognito > User Pools > Ingenes
+
+COGNITO_REGION = us-east-1
+COGNITO_USER_POOL_ID = YOUR_USER_POOL_ID_HERE
+COGNITO_CLIENT_ID = YOUR_CLIENT_ID_HERE
+COGNITO_CLIENT_SECRET =
+
+// MARK: - FileMaker API (Legacy - deprecated)
+FILEMAKER_BASE_URL = https$(COLON)//your-server.com/fmi/data/v1/databases/YourDB
+FILEMAKER_USERNAME =
+FILEMAKER_PASSWORD =

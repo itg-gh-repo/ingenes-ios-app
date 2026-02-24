@@ -1,6 +1,6 @@
-# TAG2 iOS App
+# Ingenes iOS App
 
-Native iOS app for TAG2 employee recognition system built with Swift and SwiftUI.
+Native iOS app for Ingenes management system built with Swift and SwiftUI.
 
 ## Requirements
 
@@ -17,8 +17,8 @@ Native iOS app for TAG2 employee recognition system built with Swift and SwiftUI
 2. File → New → Project
 3. Select: iOS → App
 4. Configure:
-   - **Product Name:** TAG2
-   - **Bundle Identifier:** mx.tag2.app
+   - **Product Name:** Ingenes
+   - **Bundle Identifier:** mx.itgroup.ingenes
    - **Interface:** SwiftUI
    - **Language:** Swift
    - **Include Tests:** Yes (both Unit and UI)
@@ -28,7 +28,7 @@ Native iOS app for TAG2 employee recognition system built with Swift and SwiftUI
 
 After creating the Xcode project:
 
-1. Delete the auto-generated ContentView.swift and TAG2App.swift
+1. Delete the auto-generated ContentView.swift and IngenesApp.swift
 2. Drag the following folders into your Xcode project:
    - `App/`
    - `Core/`
@@ -86,9 +86,9 @@ Add these keys:
 ## Project Structure
 
 ```
-TAG2/
+Ingenes/
 ├── App/                    # App entry point
-│   ├── TAG2App.swift
+│   ├── IngenesApp.swift
 │   ├── AppDelegate.swift
 │   ├── AppState.swift
 │   └── ContentView.swift
@@ -143,8 +143,8 @@ Run tests with: Cmd+U
 Or from command line:
 ```bash
 xcodebuild test \
-  -project TAG2.xcodeproj \
-  -scheme TAG2 \
+  -project ingenes.xcodeproj \
+  -scheme ingenes \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 

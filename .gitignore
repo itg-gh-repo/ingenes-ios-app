@@ -66,8 +66,8 @@ Thumbs.db
 
 # SECURITY - Sensitive Configuration Files
 # These files contain AWS credentials and should NEVER be committed
-tag2/Config/Debug.xcconfig
-tag2/Config/Release.xcconfig
+ingenes/Config/Debug.xcconfig
+ingenes/Config/Release.xcconfig
 *.xcconfig
 !*.xcconfig.template
 

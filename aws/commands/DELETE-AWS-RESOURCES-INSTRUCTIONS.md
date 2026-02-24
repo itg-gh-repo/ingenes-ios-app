@@ -1,8 +1,8 @@
-# TAG2 AWS Resources Deletion Guide
+# Ingenes AWS Resources Deletion Guide
 
 ## Overview
 
-This document provides detailed instructions for permanently deleting all AWS resources used by the TAG2 iOS application.
+This document provides detailed instructions for permanently deleting all AWS resources used by the Ingenes iOS application.
 
 ---
 
@@ -13,7 +13,7 @@ This document provides detailed instructions for permanently deleting all AWS re
 | **Cognito User Pool** | `us-east-1_93HMCJqvJ` | User authentication pool with all registered users |
 | **Cognito App Client** | `6s98m6r64ql20ab09phvj2of2n` | iOS app client (deleted with User Pool) |
 | **Cognito Identity Pool** | `us-east-1:c9967d40-795e-4682-a4f4-67ab4286c7dd` | Provides temporary AWS credentials |
-| **Secrets Manager Secret** | `TAG2/FileMaker/Credentials` | FileMaker API credentials |
+| **Secrets Manager Secret** | `Ingenes/FileMaker/Credentials` | FileMaker API credentials |
 
 **Region:** `us-east-1` (N. Virginia)
 
@@ -92,7 +92,7 @@ Or use the AWS managed policies:
 ### Step 1: Navigate to the Script Directory
 
 ```bash
-cd /Users/ozz/Desktop/TAG2/aws/commands
+cd /Users/ozz/Desktop/Ingenes/aws/commands
 ```
 
 ### Step 2: Make the Script Executable
@@ -118,7 +118,7 @@ aws cognito-identity describe-identity-pool \
 
 # Check Secrets Manager Secret
 aws secretsmanager describe-secret \
-    --secret-id TAG2/FileMaker/Credentials \
+    --secret-id Ingenes/FileMaker/Credentials \
     --region us-east-1
 ```
 
@@ -134,7 +134,7 @@ The script will:
 1. Verify AWS CLI is installed
 2. Verify AWS credentials are valid
 3. Display a warning about the resources to be deleted
-4. Ask you to type `DELETE-TAG2-AWS` to confirm
+4. Ask you to type `DELETE-Ingenes-AWS` to confirm
 5. Ask for a final `yes/no` confirmation
 6. Delete the resources in the correct order
 
@@ -148,7 +148,7 @@ If you prefer to delete resources manually via AWS Console or CLI:
 
 1. **Secrets Manager:**
    - Go to: https://console.aws.amazon.com/secretsmanager/home?region=us-east-1
-   - Find secret: `TAG2/FileMaker/Credentials`
+   - Find secret: `Ingenes/FileMaker/Credentials`
    - Click "Delete secret"
 
 2. **Cognito Identity Pool:**
@@ -166,7 +166,7 @@ If you prefer to delete resources manually via AWS Console or CLI:
 ```bash
 # 1. Delete Secrets Manager Secret (force immediate deletion)
 aws secretsmanager delete-secret \
-    --secret-id "TAG2/FileMaker/Credentials" \
+    --secret-id "Ingenes/FileMaker/Credentials" \
     --force-delete-without-recovery \
     --region us-east-1
 
@@ -192,13 +192,13 @@ After deleting the AWS resources, you should also:
 Cognito Identity Pool may have created IAM roles. Check and delete if needed:
 
 ```bash
-# List roles that might be related to TAG2
-aws iam list-roles --query "Roles[?contains(RoleName, 'TAG2') || contains(RoleName, 'Cognito')].RoleName" --output table
+# List roles that might be related to Ingenes
+aws iam list-roles --query "Roles[?contains(RoleName, 'Ingenes') || contains(RoleName, 'Cognito')].RoleName" --output table
 ```
 
 If you find roles like:
-- `Cognito_TAG2Auth_Role`
-- `Cognito_TAG2Unauth_Role`
+- `Cognito_IngenesAuth_Role`
+- `Cognito_IngenesUnauth_Role`
 
 Delete them:
 ```bash
@@ -213,8 +213,8 @@ aws iam delete-role --role-name "ROLE_NAME"
 ### 2. Clean Up Local Configuration
 
 Remove or update these files in the project:
-- `tag2/Config/Debug.xcconfig`
-- `tag2/Config/Release.xcconfig`
+- `ingenes/Config/Debug.xcconfig`
+- `ingenes/Config/Release.xcconfig`
 
 ### 3. Clear Keychain on Test Devices
 
@@ -234,7 +234,7 @@ If you used the standard deletion (not force delete), the secret will be in a "p
 
 ```bash
 aws secretsmanager restore-secret \
-    --secret-id "TAG2/FileMaker/Credentials" \
+    --secret-id "Ingenes/FileMaker/Credentials" \
     --region us-east-1
 ```
 

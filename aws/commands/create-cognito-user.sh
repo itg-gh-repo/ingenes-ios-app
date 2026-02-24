@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #===============================================================================
-# TAG2 Cognito User Creation Script
+# Ingenes Cognito User Creation Script
 #===============================================================================
-# This script creates new users in the TAG2 Cognito User Pool.
+# This script creates new users in the Ingenes Cognito User Pool.
 # Users are created with a temporary password and will be required to
 # change their password on first login.
 #
@@ -17,7 +17,7 @@
 
 set -e  # Exit on any error
 
-# Configuration - TAG2 AWS Resource Identifiers
+# Configuration - Ingenes AWS Resource Identifiers
 AWS_REGION="us-east-1"
 COGNITO_USER_POOL_ID="us-east-1_93HMCJqvJ"
 TEMPORARY_PASSWORD="TempPassword123!@"
@@ -50,7 +50,7 @@ log_error() {
 # Function to display usage
 show_usage() {
     echo ""
-    echo -e "${CYAN}TAG2 Cognito User Creation Script${NC}"
+    echo -e "${CYAN}Ingenes Cognito User Creation Script${NC}"
     echo ""
     echo "Usage:"
     echo "  $0 <email> [firstName] [lastName] [storeName] [customerId]"
@@ -193,7 +193,7 @@ main() {
 
     echo ""
     echo "=============================================================================="
-    echo "           TAG2 Cognito User Creation"
+    echo "           Ingenes Cognito User Creation"
     echo "=============================================================================="
     echo ""
 
